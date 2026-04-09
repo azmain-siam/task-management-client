@@ -61,7 +61,7 @@ export function TasksTable({
                   }
                   disabled={loading}
                 >
-                  <option value="IN PROGRESS">IN PROGRESS</option>
+                  <option value="IN_PROGRESS">IN PROGRESS</option>
                   <option value="TODO">TODO</option>
                   <option value="DONE">DONE</option>
                 </select>

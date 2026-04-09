@@ -1,5 +1,5 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
-
+// const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
+const API_BASE_URL = "http://localhost:3002";
 function sanitizeBaseUrl() {
   return API_BASE_URL.replace(/\/$/, "");
 }
@@ -18,7 +18,7 @@ function buildUrl(path: string) {
 export async function apiRequest<T>(
   path: string,
   token: string,
-  init?: RequestInit
+  init?: RequestInit,
 ): Promise<T> {
   const headers = new Headers(init?.headers);
   if (!headers.has("Content-Type")) {
