@@ -39,8 +39,8 @@ export default function UserProfilePage() {
   const stats = useMemo(() => {
     return {
       total: tasks.length,
-      pending: tasks.filter((task) => task.status === "PENDING").length,
-      processing: tasks.filter((task) => task.status === "PROCESSING").length,
+      pending: tasks.filter((task) => task.status === "TODO").length,
+      processing: tasks.filter((task) => task.status === "IN PROGRESS").length,
       done: tasks.filter((task) => task.status === "DONE").length,
     };
   }, [tasks]);
