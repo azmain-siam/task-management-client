@@ -8,7 +8,7 @@ import { TasksTable } from "@/components/tasks/tasks-table";
 import { useAuth } from "@/context/auth-context";
 import { apiRequest } from "@/lib/api";
 import { extractArray } from "@/lib/helpers";
-import { ApiUser, Task, TaskStatus } from "@/types";
+import { ApiUser, AuditLog, Task, TaskStatus } from "@/types";
 
 const defaultTaskForm = {
   title: "",
@@ -44,9 +44,60 @@ export default function AdminTasksPage() {
   }
 
   async function loadUsers() {
+    const normalizeUsers = (list: ApiUser[]) => {
+      return Array.from(
+        new Map(
+          list
+            .filter((item) => item?.id)
+            .map((item) => [
+              item.id,
+              {
+                ...item,
+                name: item.name ?? item.fullName,
+              },
+            ])
+        ).values()
+      );
+    };
+
     try {
-      const payload = await apiRequest<ApiUser[] | { items: ApiUser[] }>("/api/users", token);
-      setUsers(extractArray<ApiUser>(payload));
+      const payload = await apiRequest<ApiUser[] | { items: ApiUser[] }>("/api/user", token);
+      const usersFromUsersEndpoint = normalizeUsers(extractArray<ApiUser>(payload));
+      if (usersFromUsersEndpoint.length > 0) {
+        setUsers(usersFromUsersEndpoint);
+        return;
+      }
+    } catch {
+      // Continue to fallbacks below.
+    }
+
+    try {
+      const taskPayload = await apiRequest<Task[] | { items: Task[] }>("/api/tasks", token);
+      const usersFromTasks = normalizeUsers(
+        extractArray<Task>(taskPayload)
+          .map((task) => task.assignedTo)
+          .filter((assigned): assigned is ApiUser => Boolean(assigned?.id))
+      );
+
+      if (usersFromTasks.length > 0) {
+        setUsers(usersFromTasks);
+        return;
+      }
+    } catch {
+      // Continue to audit fallback.
+    }
+
+    try {
+      const auditPayload = await apiRequest<AuditLog[] | { items: AuditLog[] }>(
+        "/api/audit/logs",
+        token
+      );
+      const usersFromAudit = normalizeUsers(
+        extractArray<AuditLog>(auditPayload)
+          .map((log) => log.actor)
+          .filter((actor): actor is ApiUser => Boolean(actor?.id))
+      );
+      setUsers(usersFromAudit);
     } catch {
       setUsers([]);
     }
@@ -144,17 +195,20 @@ export default function AdminTasksPage() {
 
   return (
     <>
-      <header className="mb-4 flex items-center justify-between gap-3 border-b border-zinc-200 pb-3">
-        <h1 className="text-2xl font-semibold text-zinc-800">Task Management</h1>
+      <header className="mb-5 flex items-center justify-between gap-3 border-b border-slate-200 pb-3">
+        <div>
+          <h1 className="text-2xl font-semibold text-slate-900">Task Management</h1>
+          <p className="mt-1 text-sm text-slate-600">Create, assign, and maintain tasks.</p>
+        </div>
         <button
-          className="rounded bg-zinc-200 px-3 py-2 text-sm text-zinc-700 hover:bg-zinc-300"
+          className="rounded-md bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 ring-1 ring-slate-200 hover:bg-slate-200"
           onClick={refreshData}
         >
           Refresh
         </button>
       </header>
 
-      {error ? <p className="mb-4 rounded bg-red-50 p-3 text-sm text-red-700">{error}</p> : null}
+      {error ? <p className="mb-4 rounded-lg bg-rose-50 p-3 text-sm text-rose-700">{error}</p> : null}
 
       <TaskForm
         value={taskForm}

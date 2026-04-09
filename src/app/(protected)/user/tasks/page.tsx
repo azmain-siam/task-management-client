@@ -65,17 +65,20 @@ export default function UserTasksPage() {
 
   return (
     <>
-      <header className="mb-4 flex items-center justify-between gap-3 border-b border-zinc-200 pb-3">
-        <h1 className="text-2xl font-semibold text-zinc-800">My Tasks</h1>
+      <header className="mb-5 flex items-center justify-between gap-3 border-b border-slate-200 pb-3">
+        <div>
+          <h1 className="text-2xl font-semibold text-slate-900">My Tasks</h1>
+          <p className="mt-1 text-sm text-slate-600">Track and update your assigned work.</p>
+        </div>
         <button
-          className="rounded bg-zinc-200 px-3 py-2 text-sm text-zinc-700 hover:bg-zinc-300"
+          className="rounded-md bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 ring-1 ring-slate-200 hover:bg-slate-200"
           onClick={loadTasks}
         >
           Refresh
         </button>
       </header>
 
-      {error ? <p className="mb-4 rounded bg-red-50 p-3 text-sm text-red-700">{error}</p> : null}
+      {error ? <p className="mb-4 rounded-lg bg-rose-50 p-3 text-sm text-rose-700">{error}</p> : null}
 
       <TasksTable
         tasks={tasks}

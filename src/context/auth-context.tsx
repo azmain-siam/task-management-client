@@ -15,6 +15,41 @@ type LoginResponse = {
   accessToken?: string;
 };
 
+function normalizeUser(user?: ApiUser | null): ApiUser | null {
+  if (!user || !user.id) return null;
+  return {
+    ...user,
+    name: user.name ?? user.fullName,
+  };
+}
+
+function extractUserFromPayload(payload: unknown): ApiUser | null {
+  if (!payload || typeof payload !== "object") return null;
+  const record = payload as Record<string, unknown>;
+
+  const directUser = normalizeUser(record as ApiUser);
+  if (directUser) return directUser;
+
+  if (record.user && typeof record.user === "object") {
+    const user = normalizeUser(record.user as ApiUser);
+    if (user) return user;
+  }
+
+  if (record.data && typeof record.data === "object") {
+    const dataRecord = record.data as Record<string, unknown>;
+
+    if (dataRecord.user && typeof dataRecord.user === "object") {
+      const user = normalizeUser(dataRecord.user as ApiUser);
+      if (user) return user;
+    }
+
+    const user = normalizeUser(dataRecord as ApiUser);
+    if (user) return user;
+  }
+
+  return null;
+}
+
 type AuthContextValue = {
   token: string;
   user: ApiUser | null;
@@ -34,11 +69,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function fetchMe(currentToken: string) {
     try {
-      const meRaw = await apiRequest<ApiUser>("/api/auth/me", currentToken);
-      const me: ApiUser = {
-        ...meRaw,
-        name: meRaw.name ?? meRaw.fullName,
-      };
+      const mePayload = await apiRequest<unknown>("/api/auth/me", currentToken);
+      const me = extractUserFromPayload(mePayload);
+      if (!me) {
+        throw new Error("Invalid /auth/me response");
+      }
       const role = toRole(me);
       setUser(me);
       setAuthStorage(currentToken, role);
@@ -82,9 +117,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     setToken(nextToken);
-    const loginUser = response.data?.user
-      ? { ...response.data.user, name: response.data.user.name ?? response.data.user.fullName }
-      : null;
+    const loginUser = extractUserFromPayload(response);
     if (loginUser) {
       setUser(loginUser);
     }

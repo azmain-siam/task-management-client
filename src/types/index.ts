@@ -1,5 +1,5 @@
 export type Role = "ADMIN" | "USER";
-export type TaskStatus = "PENDING" | "PROCESSING" | "DONE";
+export type TaskStatus = "IN PROGRESS" | "TODO" | "DONE";
 
 export type ApiUser = {
   id: string;

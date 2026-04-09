@@ -32,40 +32,38 @@ export function TaskForm({
   return (
     <form
       onSubmit={onSubmit}
-      className="mb-6 grid gap-3 rounded border border-zinc-200 p-4 md:grid-cols-2"
+      className="mb-6 grid gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 md:grid-cols-2"
     >
       <input
-        className="rounded border border-zinc-300 px-3 py-2 text-sm text-zinc-900"
+        className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
         placeholder="Title"
         value={value.title}
         onChange={(event) => onChange({ ...value, title: event.target.value })}
       />
-      <input
-        className="rounded border border-zinc-300 px-3 py-2 text-sm text-zinc-900"
-        placeholder="Assigned User ID"
+      <select
+        className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
         value={value.assignedToId}
         onChange={(event) => onChange({ ...value, assignedToId: event.target.value })}
-        list="user-options"
-      />
-      <textarea
-        className="rounded border border-zinc-300 px-3 py-2 text-sm text-zinc-900 md:col-span-2"
-        placeholder="Description"
-        value={value.description}
-        onChange={(event) => onChange({ ...value, description: event.target.value })}
-        rows={3}
-      />
-      <datalist id="user-options">
+      >
+        <option value="">Select assignee</option>
         {users.map((item) => (
           <option key={item.id} value={item.id}>
             {getUserDisplayName(item)}
           </option>
         ))}
-      </datalist>
+      </select>
+      <textarea
+        className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 md:col-span-2"
+        placeholder="Description"
+        value={value.description}
+        onChange={(event) => onChange({ ...value, description: event.target.value })}
+        rows={3}
+      />
       <div className="md:col-span-2 flex gap-2">
         <button
           type="submit"
           disabled={loading}
-          className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
+          className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60"
         >
           {editing ? "Update Task" : "Create Task"}
         </button>
@@ -73,7 +71,7 @@ export function TaskForm({
           <button
             type="button"
             onClick={onCancel}
-            className="rounded bg-zinc-200 px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-300"
+            className="rounded-md bg-white px-4 py-2 text-sm text-slate-700 ring-1 ring-slate-300 hover:bg-slate-100"
           >
             Cancel
           </button>

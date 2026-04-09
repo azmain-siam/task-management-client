@@ -8,9 +8,20 @@ export function toRole(user: ApiUser | null): Role {
 export function extractArray<T>(payload: unknown): T[] {
   if (Array.isArray(payload)) return payload as T[];
   if (payload && typeof payload === "object") {
-    const maybeItems = payload as { items?: unknown; data?: unknown };
-    if (Array.isArray(maybeItems.items)) return maybeItems.items as T[];
-    if (Array.isArray(maybeItems.data)) return maybeItems.data as T[];
+    const record = payload as Record<string, unknown>;
+    const directKeys = ["items", "data", "users", "tasks", "logs", "results"];
+
+    for (const key of directKeys) {
+      if (Array.isArray(record[key])) return record[key] as T[];
+    }
+
+    const nestedData = record.data;
+    if (nestedData && typeof nestedData === "object") {
+      const nested = nestedData as Record<string, unknown>;
+      for (const key of directKeys) {
+        if (Array.isArray(nested[key])) return nested[key] as T[];
+      }
+    }
   }
   return [];
 }
